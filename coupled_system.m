@@ -7,15 +7,7 @@ function data = coupled_system(init_cond, N, rx, ry, betaxy, betayx)
 data = NaN(N,2);
 data(1,:) = init_cond;
 for ii=1:(N-1)
-    data(ii+1,:) = step(data(ii,:),rx,ry,betaxy,betayx);
+    data(ii+1,1) = data(ii,1)*(rx-rx*data(ii,1)-betaxy*data(ii,2));
+    data(ii+1,2) = data(ii,2)*(ry-ry*data(ii,2)-betayx*data(ii,1));
 end
-end
-
-function Y_out = step(data, rx, ry, betaxy, betayx)
-    X = data(1);
-    Y = data(2);
-
-    Y_out = NaN(size(data));
-    Y_out(1) = X*(rx-rx*X-betaxy*Y);
-    Y_out(2) = Y*(ry-ry*Y-betayx*X);
 end
