@@ -27,16 +27,16 @@ x = out(:,2);
 y = out(:,3);
 z = out(:,4);
 %% reselect Lorenz variables without having to re-run sim
-var1 = y;
-var2 = z;
+var1 = x;
+var2 = y;
 
 data = [var1 var2];
 
 %% Generate Coupled System Data
-steps = 10000;
+steps = 1000;
 rx = 3.7;
 ry = 3.7; 
-betayx = 0.01;
+betayx = 0.32;
 betaxy = 0.0;
 IC = [0.2 0.4];
 data = coupled_system(IC, steps, rx, ry, betaxy, betayx);
@@ -50,7 +50,36 @@ data = data + noiseAmp * randn(size(data));
 
 LMesh = 100:100:steps;
 
-[correlations, xM, yM] = crossConvergentMap(data, 30, 3, LMesh); 
+[correlations, xM, yM] = crossConvergentMap(data, 1, 3, LMesh); 
+
+%% sensitivity analysis tau
+tauMesh = 1:1:20;
+finalCorrs = zeros(length(tauMesh), 2);
+for i = 1:length(tauMesh)
+    tau = tauMesh(i);
+    [correlations, ~, ~] = crossConvergentMap(data, tau, 2, steps);
+    finalCorrs(i,:) = correlations;
+end
+
+plot(tauMesh, finalCorrs(:,1), tauMesh, finalCorrs(:,2), 'LineWidth', 1.5)
+legend("$X$", "$Y$", 'Interpreter', 'latex')
+xlabel("$\tau$", 'Interpreter','latex')
+ylabel('$\rho$', 'Interpreter','latex')
+
+%% sensitivity analysis E
+eMesh = 1:1:12;
+finalCorrs = zeros(length(eMesh), 2);
+for i = 1:length(eMesh)
+    E = eMesh(i);
+    [correlations, ~, ~] = crossConvergentMap(data, 3, E, steps);
+    finalCorrs(i,:) = correlations;
+end
+
+plot(eMesh, finalCorrs(:,1), eMesh, finalCorrs(:,2), 'LineWidth', 1.5)
+legend("$X$", "$Y$", 'Interpreter', 'latex')
+xlabel("$E$", 'Interpreter','latex')
+ylabel('$\rho$', 'Interpreter','latex')
+
 
 %% plotting
 
@@ -58,7 +87,7 @@ figure()
 % if the var1 predictions are converging with increasing time, that means
 % that var2 can predict var1 which means that var1 causes var2
 plot(LMesh, correlations(:,1), LMesh, correlations(:,2),'LineWidth',1.5)
-legend("Y Predictions", "Z Predictions")
+legend("X Predictions", "Y Predictions")
 %ylim([-1 1])
 ylabel("Predictive power corr$(\hat{Z}, Z)$",'Interpreter','latex')
 % figure()
@@ -79,7 +108,7 @@ plot(data(:,2))
 % plot(time(1:10:end), x(1:10:end), '-o', 'MarkerFaceColor', [0.3 0.3 0.7])
 % xlim([24 25])
 
-%% Manifold Visualization
+%% Manifold Visualization (3d)
 figure()
 tiledlayout(1,2, "TileSpacing","tight")
 nexttile()
@@ -89,9 +118,21 @@ ylabel("$X_{t-\tau}$", 'Interpreter','latex');
 zlabel("$X_{t-2\tau}$", 'Interpreter','latex');
 nexttile()
 plot3(yM(:,1),yM(:,2),yM(:,3));
+xlabel("$Z_t$",'Interpreter','latex');
+ylabel("$Z_{t-\tau}$", 'Interpreter','latex');
+zlabel("$Z_{t-2\tau}$", 'Interpreter','latex');
+
+%% Manifold Visualization (2d)
+figure()
+tiledlayout(1,2, "TileSpacing","tight")
+nexttile()
+scatter(xM(:,1),xM(:,2));
+xlabel("$X_t$",'Interpreter','latex');
+ylabel("$X_{t-\tau}$", 'Interpreter','latex');
+nexttile()
+scatter(yM(:,1),yM(:,2));
 xlabel("$Y_t$",'Interpreter','latex');
 ylabel("$Y_{t-\tau}$", 'Interpreter','latex');
-zlabel("$Y_{t-2\tau}$", 'Interpreter','latex');
 
 %%
 
