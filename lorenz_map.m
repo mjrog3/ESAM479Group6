@@ -1,39 +1,45 @@
-function lorenz_system()
+function lorenz_map()
+    % Lorenz system parameters
     sigma = 10;
     b = 8/3;
     r = 28; % Typical value for observing chaos
-    initial_conditions = [1 1 1; 1.01 1 1]; % Initial conditions [x0; y0; z0]
-    tspan = [0 10]; % Extended time span for the simulation
+    initial_conditions = [1; 1; 1]; % Initial conditions [x0; y0; z0]
+    tspan = [0 1.5]; % Time span to observe one Lyapunov time
 
-    opts = odeset('RelTol',1e-5,'AbsTol',1e-8); % Setting solver options for better accuracy
+    % Solver options
+    opts1 = odeset('RelTol',1e-7,'AbsTol',1e-7); % Higher precision
+    opts2 = odeset('RelTol',1e-5,'AbsTol',1e-5); % Lower precision
 
-    for i = 1:2
-        [t, sol] = ode45(@(t, y) lorenzODE(t, y, sigma, b, r), tspan, initial_conditions(i,:), opts);
-        x = sol(:, 1);
-        y = sol(:, 2);
-        z = sol(:, 3);
+    % Solve with high precision
+    [t1, sol1] = ode45(@(t, y) lorenzODE(t, y, sigma, b, r), tspan, initial_conditions, opts1);
+    x1 = sol1(:, 1);
+    y1 = sol1(:, 2);
+    z1 = sol1(:, 3);
 
-        figure; % Create a new figure window
-        subplot(3, 1, 1);
-        plot(t, x);
-        title(['x(t) with r = ', num2str(r)]);
-        xlabel('Time');
-        ylabel('x');
+    % Solve with lower precision
+    [t2, sol2] = ode45(@(t, y) lorenzODE(t, y, sigma, b, r), tspan, initial_conditions, opts2);
+    x2 = sol2(:, 1);
+    y2 = sol2(:, 2);
+    z2 = sol2(:, 3);
 
-        subplot(3, 1, 2);
-        plot(t, y);
-        title(['y(t) with r = ', num2str(r)]);
-        xlabel('Time');
-        ylabel('y');
+    % Plotting
+    figure;
+    subplot(2, 1, 1);
+    plot(t1, x1, 'b', t2, x2, 'r--');
+    legend('High precision', 'Low precision');
+    title('Comparison of x(t) solutions');
+    xlabel('Time');
+    ylabel('x');
 
-        subplot(3, 1, 3);
-        plot3(x, y, z);
-        title('3D Trajectory of Lorenz Attractor');
-        xlabel('x');
-        ylabel('y');
-        zlabel('z');
-        grid on; % Enable grid for better visualization
-    end
+    subplot(2, 1, 2);
+    plot3(x1, y1, z1, 'b', x2, y2, z2, 'r--');
+    legend('High precision', 'Low precision');
+    title('3D Trajectory of Lorenz Attractor');
+    xlabel('x');
+    ylabel('y');
+    zlabel('z');
+    grid on;
+
 end
 
 function dy = lorenzODE(t, y, sigma, b, r)
