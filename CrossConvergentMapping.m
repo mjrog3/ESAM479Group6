@@ -21,25 +21,36 @@
 numVars = 3;
 steps = 4000;
 tRange = [0 100];
-out = generate_lorenz(10, 8/3, 28, [1 1 1], linspace(tRange(1), tRange(2), steps));
+% out = generate_lorenz(10, 8/3, 28, [1 1 1], linspace(tRange(1), tRange(2), steps));
+out = generate_lorenz(10.4, 3, 12, [1 1 1], linspace(tRange(1), tRange(2), steps));
 time = out(:,1);
 x = out(:,2);
 y = out(:,3);
 z = out(:,4);
+
+%% Try with noise
+% numVars = 3;
+% steps = 4000;
+% tRange = [0 100];
+% out = generate_noisy_lorenz(10, 8/3, 28, [1 1 1], linspace(tRange(1), tRange(2), steps), [5 5 5]);
+% time = out(:,1);
+% x = out(:,2);
+% y = out(:,3);
+% z = out(:,4);
 %% reselect Lorenz variables without having to re-run sim
-var1 = x;
-var2 = y;
+var1 = x.*y;
+var2 = z;
 
 data = [var1 var2];
 
 %% Generate Coupled System Data
-steps = 1000;
-rx = 3.7;
-ry = 3.7; 
-betayx = 0.32;
-betaxy = 0.0;
-IC = [0.2 0.4];
-data = coupled_system(IC, steps, rx, ry, betaxy, betayx);
+% steps = 1000;
+% rx = 3.7;
+% ry = 3.7; 
+% betayx = 0.32;
+% betaxy = 0.0;
+% IC = [0.2 0.4];
+% data = coupled_system(IC, steps, rx, ry, betaxy, betayx);
 %% CCM
 
 noiseAmp = 0;
@@ -53,32 +64,32 @@ LMesh = 100:100:steps;
 [correlations, xM, yM] = crossConvergentMap(data, 1, 3, LMesh); 
 
 %% sensitivity analysis tau
-tauMesh = 1:1:20;
-finalCorrs = zeros(length(tauMesh), 2);
-for i = 1:length(tauMesh)
-    tau = tauMesh(i);
-    [correlations, ~, ~] = crossConvergentMap(data, tau, 2, steps);
-    finalCorrs(i,:) = correlations;
-end
-
-plot(tauMesh, finalCorrs(:,1), tauMesh, finalCorrs(:,2), 'LineWidth', 1.5)
-legend("$X$", "$Y$", 'Interpreter', 'latex')
-xlabel("$\tau$", 'Interpreter','latex')
-ylabel('$\rho$', 'Interpreter','latex')
+% tauMesh = 1:1:20;
+% finalCorrs = zeros(length(tauMesh), 2);
+% for i = 1:length(tauMesh)
+%     tau = tauMesh(i);
+%     [correlations, ~, ~] = crossConvergentMap(data, tau, 2, steps);
+%     finalCorrs(i,:) = correlations;
+% end
+% 
+% plot(tauMesh, finalCorrs(:,1), tauMesh, finalCorrs(:,2), 'LineWidth', 1.5)
+% legend("$X$", "$Y$", 'Interpreter', 'latex')
+% xlabel("$\tau$", 'Interpreter','latex')
+% ylabel('$\rho$', 'Interpreter','latex')
 
 %% sensitivity analysis E
-eMesh = 1:1:12;
-finalCorrs = zeros(length(eMesh), 2);
-for i = 1:length(eMesh)
-    E = eMesh(i);
-    [correlations, ~, ~] = crossConvergentMap(data, 3, E, steps);
-    finalCorrs(i,:) = correlations;
-end
-
-plot(eMesh, finalCorrs(:,1), eMesh, finalCorrs(:,2), 'LineWidth', 1.5)
-legend("$X$", "$Y$", 'Interpreter', 'latex')
-xlabel("$E$", 'Interpreter','latex')
-ylabel('$\rho$', 'Interpreter','latex')
+% eMesh = 1:1:12;
+% finalCorrs = zeros(length(eMesh), 2);
+% for i = 1:length(eMesh)
+%     E = eMesh(i);
+%     [correlations, ~, ~] = crossConvergentMap(data, 3, E, steps);
+%     finalCorrs(i,:) = correlations;
+% end
+% 
+% plot(eMesh, finalCorrs(:,1), eMesh, finalCorrs(:,2), 'LineWidth', 1.5)
+% legend("$X$", "$Y$", 'Interpreter', 'latex')
+% xlabel("$E$", 'Interpreter','latex')
+% ylabel('$\rho$', 'Interpreter','latex')
 
 
 %% plotting
@@ -87,16 +98,17 @@ figure()
 % if the var1 predictions are converging with increasing time, that means
 % that var2 can predict var1 which means that var1 causes var2
 plot(LMesh, correlations(:,1), LMesh, correlations(:,2),'LineWidth',1.5)
-legend("X Predictions", "Y Predictions")
+legend("X*Y Predictions", "Z Predictions")
 %ylim([-1 1])
 ylabel("Predictive power corr$(\hat{Z}, Z)$",'Interpreter','latex')
-% figure()
-% plot(time, x, time, y, time, z);
-% hold on
-% %libraryTimes = time(LMesh);
-% %xline(libraryTimes);
-% legend("X", "Y", "Z")
-% %xlim([20 30])
+figure()
+plot(time, x, time, y, time, z);
+hold on
+%libraryTimes = time(LMesh);
+%xline(libraryTimes);
+legend("X", "Y", "Z")
+%xlim([20 30])
+
 figure()
 plot(data(:,1))
 hold on
@@ -118,9 +130,9 @@ ylabel("$X_{t-\tau}$", 'Interpreter','latex');
 zlabel("$X_{t-2\tau}$", 'Interpreter','latex');
 nexttile()
 plot3(yM(:,1),yM(:,2),yM(:,3));
-xlabel("$Z_t$",'Interpreter','latex');
-ylabel("$Z_{t-\tau}$", 'Interpreter','latex');
-zlabel("$Z_{t-2\tau}$", 'Interpreter','latex');
+xlabel("$Y_t$",'Interpreter','latex');
+ylabel("$Y_{t-\tau}$", 'Interpreter','latex');
+zlabel("$Y_{t-2\tau}$", 'Interpreter','latex');
 
 %% Manifold Visualization (2d)
 figure()
@@ -142,7 +154,7 @@ function [correlations, var1Manifold, var2Manifold] = crossConvergentMap(data, t
 
     % number of data points that don't have enough history to be predicted
     skip = timeDelay*(embedDimension-1); 
-    
+
     if(min(LMesh) - skip < 1)
         error("Smallest L too short to make predictions with")
     end
@@ -164,7 +176,7 @@ function [correlations, var1Manifold, var2Manifold] = crossConvergentMap(data, t
             xManifoldPoints(:,j) = X(startPoint:startPoint+(L-skip)-1);
             yManifoldPoints(:,j) = Y(startPoint:startPoint+(L-skip)-1);
         end
-        
+
         % embedDimension+2 because we're going to manually remove the
         % point itself after the knnsearch and the paper says to do E + 1. 
         [xIdx, xD] = knnsearch(xManifoldPoints, xManifoldPoints,'K',embedDimension+2); 
@@ -177,12 +189,12 @@ function [correlations, var1Manifold, var2Manifold] = crossConvergentMap(data, t
         yWeights = yWeights./sum(yWeights, 2);
         xPred = zeros(L-skip, 1);
         yPred = zeros(L-skip, 1);
-        
+
         for j = 1:L-skip % for every row, take the weighted average of the images
             yPred(j) = xWeights(j,:) * Y(xIdx(j,2:end)+skip); % 1xn * nx1 = 1x1
             xPred(j) = yWeights(j,:) * X(yIdx(j,2:end)+skip);
         end
-        
+
         %xRMSE = rmse(xPred, X(skip+1:L));
         %yRMSE = rmse(yPred, Y(skip+1:L));
         %RMSE(i, :) = [xRMSE yRMSE];
