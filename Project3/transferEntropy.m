@@ -1,5 +1,6 @@
 numRows = 50;
 steps = 10000000;
+N = numRows*(steps-1);
 epsilon = 0.1;
 tic
 data = tentMapData(numRows, steps, epsilon);
@@ -14,5 +15,15 @@ for i = 1:length(possibleTuples)
                  (data(2:end  , 2:end  ) == possibleTuples(i, 3));
     tupleFrequencies(i) = sum(tupleMatch, "all");
 end
+
+tupleProbablities = tupleFrequencies/N;
+
+for i = 1:length(possibleTuples)
+    indices = find((possibleTuples(:,1) == possibleTuples(i,1)).*(possibleTuples(:,2) == possibleTuples(i,2)));
+    matching12 = tupleProbablities(indices);
+
+end
+
+
 
 toc
