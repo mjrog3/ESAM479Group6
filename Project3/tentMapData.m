@@ -1,4 +1,4 @@
-function data = tentMapData(numRows, steps, epsilon)
+function data = tentMapData(numRows, steps, epsilon, noiseAmp)
     IC = rand(numRows, 1);
     data = zeros(numRows + 1, steps);
     data(:,1) = [IC(end) ; IC]; % periodic boundary conditions
@@ -8,6 +8,8 @@ function data = tentMapData(numRows, steps, epsilon)
         data(1,i) = data(end, i);
     end
     
+    data = data + noiseAmp*randn(size(data));
+
     data = (data > 0.5);
 end
 
