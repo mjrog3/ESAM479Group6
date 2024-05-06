@@ -1,5 +1,5 @@
 numRows = 50;
-steps = 10000000;
+steps = 100000;
 N = numRows*(steps-1);
 epsilon = 0.1;
 tic
@@ -17,13 +17,17 @@ for i = 1:length(possibleTuples)
 end
 
 tupleProbablities = tupleFrequencies/N;
-
+tEnt = 0;
 for i = 1:length(possibleTuples)
+    matchingAll = tupleProbablities(i);
     indices = find((possibleTuples(:,1) == possibleTuples(i,1)).*(possibleTuples(:,2) == possibleTuples(i,2)));
-    matching12 = tupleProbablities(indices);
-
+    matching12 = sum(tupleProbablities(indices));
+    indices = find(possibleTuples(:,2) == possibleTuples(i,2));
+    matching2 = sum(tupleProbablities(indices));
+    indices = find((possibleTuples(:,2) == possibleTuples(i,2)).*(possibleTuples(:,3) == possibleTuples(i,3)));
+    matching23 = sum(tupleProbablities(indices));
+    tEntContribution = tupleFrequencies(i)*matchingAll*log(matchingAll/matching12*matching23/matching2);
+    tEnt = tEnt + tEntContribution;
 end
-
-
 
 toc
