@@ -68,6 +68,7 @@ figure
 subplot(1,2,1)
 plot(tA,xA(:,1),'k','LineWidth',1.5), hold on
 plot(tB,xB(:,1),'r--','LineWidth',1.5)
+legend("X_{True}","X_{Approx}",'orientation','horizontal','Location','north')
 grid on
 xlabel('Time','FontSize',13)
 ylabel('x','FontSize',13)
@@ -75,6 +76,7 @@ set(gca,'FontSize',13)
 subplot(1,2,2)
 plot(tA,xA(:,2),'k','LineWidth',1.5), hold on
 plot(tB,xB(:,2),'r--','LineWidth',1.5)
+legend("X_{True}","X_{Approx}",'orientation','horizontal','Location','north')
 grid on
 
 
